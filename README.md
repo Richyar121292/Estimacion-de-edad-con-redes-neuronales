@@ -8,7 +8,7 @@ Estimación de edad con Deep Learning basada en **ResNet50**, logrando un **MAE 
 
 <h3> 📝 Descripción </h3>  
 
-Este proyecto implementa un modelo de aprendizaje profundo para **predecir la edad de personas a partir de imágenes**. Se utiliza **ResNet50** como arquitectura base para el procesamiento y entrenamiento en un conjunto de **7,651 imágenes**.  
+Este proyecto implementa un modelo de aprendizaje profundo para **predecir la edad de personas a partir de imágenes**. Se utiliza **ResNet50** como arquitectura base para el procesamiento y entrenamiento en un conjunto de **7,591 imágenes**.  
 
 El modelo muestra una progresión positiva en el entrenamiento y validación, alcanzando un **Error Absoluto Medio (MAE) de 4.11**, optimizado mediante ajuste de hiperparámetros con **GridSearchCV**.  
 <br> 
@@ -42,7 +42,7 @@ El modelo muestra una progresión positiva en el entrenamiento y validación, al
 <h3> 📈 Resultados </h3>
 
 📌 Modelo basado en ResNet50  
-📌 Entrenamiento con 7,651 imágenes en GPU  
+📌 Entrenamiento con 7,591 imágenes en GPU  
 📌 MAE mínimo alcanzado: 4.11  
 📌 Tiempo total de entrenamiento: 89 minutos  
 <br>
