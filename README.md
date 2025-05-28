@@ -3,7 +3,7 @@
 
 <h3> 🖼️ Predicción de Edad a partir de Imágenes </h3>  
 
-Estimación de edad con Deep Learning basada en **ResNet50**, logrando un **MAE de 4.11** en la predicción.  
+Estimación de edad con Deep Learning basada en **ResNet50**, logrando un **MAE (Mean Absolute Error) de 4.11** en la predicción.  
 <br>
 
 <h3> 📝 Descripción </h3>  
