@@ -1,0 +1,122 @@
+# Importar librerías necesarias
+import os
+import pandas as pd
+import tensorflow as tf
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.applications.resnet50 import ResNet50
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import GlobalAveragePooling2D, Dense, Dropout
+from tensorflow.keras.optimizers import Adam
+
+# Función para cargar los datos de entrenamiento
+def load_train(path):
+    """Carga los datos de entrenamiento desde la ruta especificada."""
+    labels_path = os.path.join(path, 'labels.csv')
+    labels_df = pd.read_csv(labels_path)
+
+    datagen = ImageDataGenerator(
+        rescale=1./255,
+        validation_split=0.25
+    )
+
+    train_gen_flow = datagen.flow_from_dataframe(
+        dataframe=labels_df,
+        directory=os.path.join(path, 'final_files'),
+        x_col='file_name',
+        y_col='real_age',
+        target_size=(224, 224),
+        batch_size=32,
+        class_mode='raw',
+        subset='training',
+        seed=12345
+    )
+
+    return train_gen_flow
+
+# Función para cargar los datos de prueba
+def load_test(path):
+    """Carga los datos de validación desde la ruta especificada."""
+    labels_path = os.path.join(path, 'labels.csv')
+    labels_df = pd.read_csv(labels_path)
+
+    datagen = ImageDataGenerator(
+        rescale=1./255,
+        validation_split=0.25
+    )
+
+    test_gen_flow = datagen.flow_from_dataframe(
+        dataframe=labels_df,
+        directory=os.path.join(path, 'final_files'),
+        x_col='file_name',
+        y_col='real_age',
+        target_size=(224, 224),
+        batch_size=32,
+        class_mode='raw',
+        subset='validation',
+        seed=12345
+    )
+
+    return test_gen_flow
+
+# Función para definir el modelo
+def create_model(input_shape):
+    """Define el modelo basado en ResNet50."""
+    model = Sequential([
+        ResNet50(weights='imagenet', include_top=False, input_shape=input_shape),
+        GlobalAveragePooling2D(),
+        Dense(1024, activation='relu'),
+        Dropout(0.5),
+        Dense(1)  # Salida única para predicción de edad
+    ])
+
+    model.compile(optimizer=Adam(learning_rate=0.0001), loss='mean_squared_error', metrics=['mae'])
+
+    return model
+
+# Función para entrenar el modelo
+def train_model(model, train_data, test_data, batch_size=None, epochs=5, steps_per_epoch=None, validation_steps=None):
+    """Entrena el modelo con los datos proporcionados."""
+    if steps_per_epoch is None:
+        steps_per_epoch = len(train_data) if hasattr(train_data, "__len__") else 100
+    if validation_steps is None:
+        validation_steps = len(test_data) if hasattr(test_data, "__len__") else 50
+
+    model.fit(
+        train_data,
+        steps_per_epoch=steps_per_epoch,
+        validation_data=test_data,
+        validation_steps=validation_steps,
+        epochs=epochs,
+        batch_size=batch_size,
+        verbose=1
+    )
+
+    return model
+
+# Preparar script para ejecutarlo en la plataforma GPU
+init_str = """
+import pandas as pd
+import tensorflow as tf
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.applications.resnet50 import ResNet50
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import GlobalAveragePooling2D, Dense, Dropout
+from tensorflow.keras.optimizers import Adam
+"""
+
+import inspect
+
+# Verificar si hay GPU disponible
+if tf.config.list_physical_devices('GPU'):
+    with open('run_model_on_gpu.py', 'w') as f:
+        f.write(init_str)
+        f.write('\n\n')
+        
+        for fn_name in [load_train, load_test, create_model, train_model]:
+            src = inspect.getsource(fn_name)
+            f.write(src)
+            f.write('\n\n')
+
+    print("✅ Script generado correctamente para ejecución en GPU.")
+else:
+    print("⚠ No se detectó GPU disponible. Se ejecutará en CPU.")
